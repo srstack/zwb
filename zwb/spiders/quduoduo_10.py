@@ -35,28 +35,27 @@ class Haixing8Spider(scrapy.Spider):
         yield Request(
             url=url, 
             # 使用lambda来表示带参数的callback函数
-            callback = lambda response, tag = 10 : self.login(response, tag), 
+            callback = lambda response, tag = [10, '000000'] : self.login(response, tag), 
             dont_filter = True # 相同url不过滤
             )
 
     def login(self, response, tag):
-        self.chink_password(tag)
         url = 'http://ms.haixing8.cn/commreg/channel.php?d=login.startover&amp;spid=&amp;clienttype=WAP2'
         form_data = {
             'username': self.username, 
-            'password': self.password[tag], 
+            'password': tag[1], # 密码
             'submit': '确定'
             }  # 表单数据，字典格式，注意数字也要用引号引起来，否则报错。
         req = FormRequest(
             url = url, 
             method = 'POST',
             formdata = form_data,
-            callback = lambda response, passwd = self.password[tag] : self.check_login(response, passwd), # 传递当前验证的密码
+            callback = lambda response, passwd = tag[1] : self.check_login(response, passwd), # 传递当前验证的密码
             dont_filter = True # 相同url不过滤
             )
         # print('------------------start_login-----------------')
         # 10个链接的最后一个
-        if tag == 9:
+        if tag[0] == 9:
             self.flag = True
         yield req
 
@@ -82,7 +81,7 @@ class Haixing8Spider(scrapy.Spider):
                     # return [Request(url=url, callback=self.login)]
                     yield Request(
                         url = url,
-                         callback = lambda response, i = i : self.login(response, i), 
+                         callback = lambda response, tag = [i, self.password[i] ] : self.login(response, tag), # 传修改后的密码，防止错乱
                          dont_filter = True
                         )
 
