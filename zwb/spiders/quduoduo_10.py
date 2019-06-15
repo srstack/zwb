@@ -34,7 +34,7 @@ class Haixing8Spider(scrapy.Spider):
             os.mkdir(os.path.join(self.BASE_DIR,'log', self.name))
         yield Request(
             url=url, 
-            # 使用lambda来表示带参数的callback函数
+            # 使用lambda匿名函数来表示带参数的callback函数
             callback = lambda response, tag = [10, '000000'] : self.login(response, tag), 
             dont_filter = True # 相同url不过滤
             )
@@ -50,12 +50,13 @@ class Haixing8Spider(scrapy.Spider):
             url = url, 
             method = 'POST',
             formdata = form_data,
+            # 匿名函数
             callback = lambda response, passwd = tag[1] : self.check_login(response, passwd), # 传递当前验证的密码
             dont_filter = True # 相同url不过滤
             )
         # print('------------------start_login-----------------')
         # 10个链接的最后一个
-        if tag[0] == 9:
+        if tag[0] == 9 and int(tag[1])%10 == 0:
             self.flag = True
         yield req
 
@@ -93,7 +94,7 @@ class Haixing8Spider(scrapy.Spider):
         else:
             self.password[tag] = (6 - len(password))*"0" + password
     
-    # 增加10，
+    # 增加100，
     def change_password(self, tag):
         password = int(self.password[tag])
         password += 10
